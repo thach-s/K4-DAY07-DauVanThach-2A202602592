@@ -14,31 +14,36 @@
 
 ### Chủ đề (Domain) & Lý Do Chọn
 
-**Chủ đề:** [ví dụ: Customer support FAQ, Luật Việt Nam, công thức nấu ăn, ...]
+**Chủ đề:** Dịch vụ & Quy định Đại học — Mảng Học phí (Tuition Fees)
 
 **Tại sao nhóm chọn chủ đề này?**
-> *Viết 2-3 câu:*
+> Nhóm chọn chủ đề Học phí vì đây là mảng quy định quan trọng nhất đối với sinh viên, có lượng tra cứu cao và chứa nhiều thông tin có cấu trúc (mức thu, thời hạn, hình thức thanh toán, điều kiện gia hạn, chính sách miễn giảm). Ngoài ra, mảng học phí có sự phân hóa theo đối tượng sinh viên (`audience`: `student`, `faculty`) và đơn vị quản lý (`department`: `financial-affairs`, `academic-affairs`, `student-affairs`), giúp kiểm thử hiệu quả tính năng lọc theo metadata (metadata filter) trong hệ thống RAG.
 
 ### Danh sách tài liệu (Data Inventory)
 
 | # | Tên tài liệu | Nguồn (Source URL) | Ngày lấy / Phiên bản | Số ký tự | Metadata đã gán |
 |---|--------------|------------|--------------------|----------|-----------------|
-| 1 | | | | | |
-| 2 | | | | | |
-| 3 | | | | | |
-| 4 | | | | | |
-| 5 | | | | | |
+| 1 | Báo cáo lộ trình thu học phí USSH VNU | https://ussh.vnu.edu.vn/vi/gioi-thieu/ba-cong-khai/bao-cao-lo-trinh-thu-hoc-phi-cac-he-nam-hoc-2026-2027-19718.html | 2026-09-19 / 2026.1 | ~18,577 | `audience: student`, `department: financial-affairs`, `category: tuition` |
+| 2 | Quy định mới nhất về học phí Đại học Nha Trang | https://phongkhtc.ntu.edu.vn/tin-tuc/quy-dinh-moi-nhat-ve-muc-hoc-phi-tu-nam-hoc-2025---2026 | 2026-09-19 / 2026.1 | ~13,478 | `audience: student`, `department: financial-affairs`, `category: tuition` |
+| 3 | Trang quy định học phí Giáo vụ PTIT | https://giaovu.ptit.edu.vn/hoc-bong-chinh-sach/hoc-phi/ | 2026-09-19 / 2026.1 | ~8,082 | `audience: student`, `department: academic-affairs`, `category: tuition` |
+| 4 | Thông báo mức thu học phí UTT | https://www.utt.edu.vn/vn/daotao/thong-bao/thong-bao-muc-thu-hoc-phi-nam-hoc-2026-2027-a17279.html | 2026-09-19 / 2026.1 | ~6,904 | `audience: student`, `department: academic-affairs`, `category: tuition` |
+| 5 | Thông báo thu học phí học lại HK phụ HVTC | https://hvtc.edu.vn/TB-Ve-viec-thu-hoc-phi-hoc-lai-hoc-cai-thien-diem-hoc-bu-Hoc-ky-phu-nam-hoc-2025--2026-doi-voi-sinh-vien-cac-he-dao-tao-_34041.html | 2026-09-19 / 2026.1 | ~4,594 | `audience: student`, `department: academic-affairs`, `category: tuition` |
+| 6 | Thông báo học phí và lệ phí Y Khoa Phạm Ngọc Thạch | https://www.pnt.edu.vn/vi/thong-bao/thong-bao-ve-hoc-phi-va-cac-khoan-phi-le-phi-he-dao-tao-dai-hoc-nam-hoc-2025-2026 | 2026-09-19 / 2026.1 | ~3,235 | `audience: student`, `department: financial-affairs`, `category: tuition` |
 
 **Danh sách kiểm tra quản trị dữ liệu (Data governance checklist):**
-- [ ] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hoặc tài liệu nội bộ.
-- [ ] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata.
+- [x] Tập tài liệu (Corpus) chỉ chứa nguồn công khai/được phép dùng và không chứa dữ liệu cá nhân, thông tin đăng nhập hoặc tài liệu nội bộ.
+- [x] Mỗi tài liệu có `source_url`, `retrieved_at`, `document_version` (hoặc ngày hiệu lực) trong metadata.
 
 ### Cấu trúc Metadata (Metadata Schema)
 
 | Trường metadata | Kiểu | Ví dụ giá trị | Tại sao hữu ích cho truy xuất (retrieval)? |
 |----------------|------|---------------|-------------------------------|
-| | | | |
-| | | | |
+| `doc_id` | string | `huflit-tuition-notice-2026-2027` | Định danh duy nhất tệp tài liệu trong vector store |
+| `audience` | string | `student` / `faculty` / `staff` / `all` | Lọc kết quả tìm kiếm đúng đối tượng (vd: quy định học phí cho sinh viên) |
+| `department` | string | `financial-affairs` / `academic-affairs` | Khoanh vùng truy xuất theo phòng ban quản lý liên quan |
+| `category` | string | `tuition` | Phân loại chủ đề tài liệu phục vụ truy xuất chủ đề cụ thể |
+| `source_url` | string | `https://huflit.edu.vn/...` | Cung cấp liên kết nguồn minh bạch cho AI trích dẫn |
+| `retrieved_at` | string | `2026-09-19` | Đảm bảo tính cập nhật của dữ liệu và phục vụ quản trị dữ liệu |
 
 ---
 
@@ -60,12 +65,26 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 
 > Mỗi thành viên điền một khối dưới đây (copy thêm nếu nhóm có nhiều hơn 3 người).
 
-**Thành viên 1 — [Tên]**
-- **Loại chiến lược:** [FixedSize / Sentence / Recursive / custom]
-- **Mô tả & lý do chọn cho chủ đề này:** *(2-3 câu)*
-- **Code snippet (nếu custom):**
+**Thành viên 1 — Đậu Văn Thạch (SentenceChunker)**
+- **Loại chiến lược:** `SentenceChunker` (Tách theo đơn vị câu)
+- **Mô tả & lý do chọn cho chủ đề này:** Chiến lược này tự động nhận diện ranh giới các câu bằng biểu thức chính quy (regex qua dấu chấm, chấm hỏi, chấm cảm) và gom tối đa `max_sentences_per_chunk=3` câu vào 1 chunk. Lựa chọn này cực kỳ phù hợp với mảng Học phí vì các quy định học phí luôn được phát biểu thành từng câu hoàn chỉnh (như thời hạn nộp, cú pháp chuyển khoản, mức phí). Việc cắt theo câu giúp giữ trọn vẹn ngữ nghĩa từng quy định mà không bị đứt đoạn ngẫu nhiên giữa chừng như phương pháp cắt theo ký tự cố định.
+- **Code snippet (implementation):**
 ```python
-# Dán mã nguồn (implementation) vào đây
+def chunk(self, text: str) -> list[str]:
+    if not text or not text.strip():
+        return []
+    raw_sentences = re.split(r'(?<=[.!?])(?:\s+|\n+)', text)
+    sentences = [s.strip() for s in raw_sentences if s.strip()]
+    if not sentences:
+        return [text.strip()] if text.strip() else []
+
+    chunks: list[str] = []
+    for i in range(0, len(sentences), self.max_sentences_per_chunk):
+        group = sentences[i : i + self.max_sentences_per_chunk]
+        chunk_text = " ".join(group).strip()
+        if chunk_text:
+            chunks.append(chunk_text)
+    return chunks
 ```
 
 **Thành viên 2 — [Tên]**
@@ -99,11 +118,11 @@ Chạy `ChunkingStrategyComparator().compare()` trên 2-3 tài liệu:
 
 | # | Câu hỏi (Query) | Câu trả lời chuẩn (Gold Answer) | Chunk nào chứa thông tin? |
 |---|-------|-------------------------------|--------------------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
+| 1 | Lộ trình thu học phí năm học 2026 - 2027 tại USSH áp dụng cho đối tượng nào? | Áp dụng cho sinh viên các hệ đào tạo tại Trường ĐH KHXH&NV. | `ussh-tuition-roadmap-2026-2027` |
+| 2 | Học viện Tài chính áp dụng thu học phí học lại, học cải thiện điểm Học kỳ phụ năm học 2025 - 2026 theo đợt nào? | Theo các đợt thông báo thu học phí học lại/cải thiện học kỳ phụ cho sinh viên các hệ đào tạo. | `hvtc-summer-retake-tuition` |
+| 3 | Quy định mức thu học phí mới nhất tại Đại học Nha Trang áp dụng từ năm học nào? | Áp dụng từ năm học 2025 - 2026. | `ntu-tuition-regulations-2025-2026` |
+| 4 | Thông báo mức thu học phí tại Đại học Công nghệ GTVT (UTT) áp dụng cho năm học nào? | Áp dụng cho năm học 2026 - 2027. | `utt-tuition-rates-2026-2027` |
+| 5 | Các khoản phí, lệ phí hệ đào tạo đại học năm học 2025 - 2026 của Trường ĐH Y khoa Phạm Ngọc Thạch do phòng ban nào quản lý? *(Cần lọc `department: financial-affairs`)* | Phòng Kế hoạch Tài chính (Trường ĐH Y khoa Phạm Ngọc Thạch). | `pnt-tuition-and-fees-2025-2026` |
 
 ### Tổng hợp chất lượng truy xuất của nhóm
 
